@@ -82,9 +82,13 @@ public class CustomerMainView extends JFrame {
         List<MenuDTO> allMenus = menuDAO.getAllMenus();
 
         for (MenuDTO m : allMenus) {
-            // 텍스트 HTML (이름 크게, 가격 작게)
-            String labelHtml = "<html><center><h3 style='margin:0'>" + m.getMenuName() + "</h3>" +
-                    "<span style='font-size:11px'>" + String.format("%,d", m.getPrice()) + "원</span></center></html>";
+            // 텍스트 HTML (이름 크게, 가격 작게) + 이름 검정, 가격 붉은색
+            String labelHtml =
+                    "<html><center>"
+                            + "<h3 style='margin:0'><font color='black'>" + m.getMenuName() + "</font></h3>"
+                            + "<span style='font-size:11px'><font color='red'>" + String.format("%,d", m.getPrice()) + "원</font></span>"
+                            + "</center></html>";
+
 
             JButton btn = new JButton(labelHtml);
             btn.setFont(UITheme.FONT_REGULAR);
@@ -110,9 +114,9 @@ public class CustomerMainView extends JFrame {
                 ImageIcon icon = loadResizedIcon(imagePath, 240, 160);
                 if (icon != null) {
                     btn.setIcon(icon);
-                    // 텍스트를 이미지 정중앙에 겹치기
+                    // 텍스트를 이미지 중앙 하단으로
                     btn.setHorizontalTextPosition(JButton.CENTER);
-                    btn.setVerticalTextPosition(JButton.CENTER);
+                    btn.setVerticalTextPosition(JButton.BOTTOM);
 
                     // 배경 투명화 + 테두리 제거
                     btn.setContentAreaFilled(false);
