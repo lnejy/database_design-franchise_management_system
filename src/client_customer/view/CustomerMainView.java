@@ -77,6 +77,8 @@ public class CustomerMainView extends JFrame {
 
         // ---------------------------------------------------------
         // 2. 중앙: 전체 메뉴판 (이미지 일괄 적용)
+        //    - 한 줄에 메뉴 3개씩 배치 (3열 GridLayout)
+        //    - 가로 스크롤은 비활성화하고, 세로 스크롤만 사용
         // ---------------------------------------------------------
         JPanel menuPanel = UITheme.createSectionPanel(new GridLayout(0, 3, 15, 15), "전체 메뉴");
         List<MenuDTO> allMenus = menuDAO.getAllMenus();
@@ -136,10 +138,17 @@ public class CustomerMainView extends JFrame {
                 btn.setBorderPainted(false);
             }
 
+            // 3개씩 배치되는 카드형 버튼이므로, 세로 높이만 적당히 고정
+            btn.setPreferredSize(new Dimension(240, 200));
+
             btn.addActionListener(e -> onMenuClick(m));
             menuPanel.add(btn);
         }
-        add(new JScrollPane(menuPanel), BorderLayout.CENTER);
+
+        JScrollPane menuScroll = new JScrollPane(menuPanel);
+        menuScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        menuScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        add(menuScroll, BorderLayout.CENTER);
 
         // ---------------------------------------------------------
         // 3. 하단: 장바구니 및 결제
