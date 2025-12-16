@@ -3,9 +3,8 @@ DROP DATABASE IF EXISTS fastfood_db;
 CREATE DATABASE fastfood_db;
 USE fastfood_db;
 
--- =============================================
+
 -- [DDL] 테이블 생성
--- =============================================
 
 -- 1. 매장 (Store)
 CREATE TABLE store (
@@ -114,9 +113,7 @@ CREATE TABLE store_sale (
     FOREIGN KEY (order_id) REFERENCES customer_order(order_id) ON DELETE CASCADE
 );
 
--- =============================================
 -- [DML] 초기 데이터 삽입 (Master Data)
--- =============================================
 
 -- 1. 매장 생성 ( 예 - 아이디: ST-001, 비번: 01012345678)
 INSERT INTO store (store_name, store_code, phone_number, address, manager_name) 
@@ -134,7 +131,7 @@ INSERT INTO ingredient (ingredient_name, ingredient_code, category_name, unit) V
 INSERT INTO menu (menu_name, menu_code, price, set_price, category_name, is_recommended) VALUES 
 ('치즈버거', 'MN-001', 6000, 8500, '버거', TRUE),
 ('더블버거', 'MN-002', 8500, 11000, '버거', FALSE),
-('감자튀김', 'MN-003', 2000, 0, '사이드', FALSE), -- 사이드는 세트가격 0
+('감자튀김', 'MN-003', 2000, 0, '사이드', FALSE),
 ('코카콜라', 'MN-004', 2000, 0, '음료', FALSE);
 
 -- 4. 레시피 연결
