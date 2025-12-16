@@ -1,68 +1,136 @@
 package client_store.view;
 
+import common.dto.StoreDTO;
+import common.ui.UITheme;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn; 
 import java.awt.*;
-import java.awt.event.ActionListener;
 
 public class StoreMainView extends JFrame {
-    private JLabel lblTitle;
-    private JTable tableInventory;
-    private DefaultTableModel tableModel;
-    private JButton btnRefresh;
+    private JTabbedPane tabbedPane;
 
-    public StoreMainView() {
-        setTitle("가맹점 관리 시스템 - 메인");
-        setSize(800, 600);
+    // 탭1: 재고
+    private JTable inventoryTable;
+    private DefaultTableModel inventoryModel;
+    private JButton btnRefreshInventory, btnOrderIngredient;
+
+    // 탭2: 매출
+    private JTable salesTable;
+    private DefaultTableModel salesModel;
+    private JLabel lblTotalSales;
+    private JButton btnRefreshSales;
+
+    // 탭3: 주방 (KDS)
+    private JTable kitchenTable;
+    private DefaultTableModel kitchenModel;
+    private JButton btnKitchenRefresh, btnCompleteOrder;
+
+    public void initUI(StoreDTO store) {
+        setTitle("가맹점 관리 - " + store.getStoreName());
+        setSize(950, 600); // 화면 너비 살짝 늘림
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setLayout(new BorderLayout());
+        getContentPane().setBackground(UITheme.BASE_BG);
 
-        // 1. 상단 (매장명 표시)
-        JPanel panelTop = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        lblTitle = new JLabel("매장 이름 로딩중...");
-        lblTitle.setFont(new Font("맑은 고딕", Font.BOLD, 20));
-        panelTop.add(lblTitle);
+        tabbedPane = new JTabbedPane();
 
-        // 새로고침 버튼
-        btnRefresh = new JButton("새로고침");
-        panelTop.add(btnRefresh);
+        // --- 1. 재고 탭 ---
+        JPanel invPanel = UITheme.createSectionPanel(new BorderLayout(), "재고 현황");
+        inventoryModel = new DefaultTableModel(new String[]{"재료명", "수량", "단위", "카테고리"}, 0);
+        inventoryTable = new JTable(inventoryModel);
+        UITheme.styleTable(inventoryTable);
+        invPanel.add(new JScrollPane(inventoryTable), BorderLayout.CENTER);
+        
+        JPanel invBtnBox = UITheme.createSectionPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10), null);
+        btnOrderIngredient = new JButton("재료 발주");
+        UITheme.applyFilled(btnOrderIngredient, UITheme.PRIMARY_LIGHT, Color.WHITE, true);
+        btnRefreshInventory = new JButton("새로고침");
+        UITheme.applyFilled(btnRefreshInventory, UITheme.PRIMARY, Color.WHITE, false);
+        invBtnBox.add(btnOrderIngredient);
+        invBtnBox.add(btnRefreshInventory);
+        invPanel.add(invBtnBox, BorderLayout.SOUTH);
+        tabbedPane.addTab("재고 관리", invPanel);
 
-        add(panelTop, BorderLayout.NORTH);
+        // --- 2. 매출 탭 ---
+        JPanel salePanel = UITheme.createSectionPanel(new BorderLayout(), "매출 내역");
+        salesModel = new DefaultTableModel(new String[]{"주문번호", "금액", "상태", "시간"}, 0);
+        salesTable = new JTable(salesModel);
+        UITheme.styleTable(salesTable);
+        salePanel.add(new JScrollPane(salesTable), BorderLayout.CENTER);
+        
+        JPanel saleBtnBox = UITheme.createSectionPanel(new BorderLayout(), null);
+        lblTotalSales = new JLabel("총 매출: 0원", SwingConstants.CENTER);
+        btnRefreshSales = new JButton("새로고침");
+        UITheme.applyFilled(btnRefreshSales, UITheme.PRIMARY, Color.WHITE, false);
+        saleBtnBox.add(lblTotalSales, BorderLayout.CENTER);
+        saleBtnBox.add(btnRefreshSales, BorderLayout.EAST);
+        salePanel.add(saleBtnBox, BorderLayout.SOUTH);
+        tabbedPane.addTab("매출 내역", salePanel);
 
-        // 2. 중앙 (재고 테이블)
-        // 컬럼 정의
-        String[] columnNames = {"ID", "재료명", "현재고", "단위", "안전재고", "상태"};
-
-        // 데이터 수정 불가하도록 설정
-        tableModel = new DefaultTableModel(columnNames, 0) {
+        // --- 3. 주방 현황 탭 ---
+        JPanel kitchenPanel = UITheme.createSectionPanel(new BorderLayout(), "주방 주문 흐름");
+        
+        // 컬럼 변경: "주문 내역" 추가
+        String[] kCols = {"ID", "주문번호", "주문 내역 (메뉴)", "금액", "주문시간"};
+        
+        // 테이블 내용 수정 불가하게 설정 (Override isCellEditable)
+        kitchenModel = new DefaultTableModel(kCols, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false;
+                return false; 
             }
         };
+        
+        kitchenTable = new JTable(kitchenModel);
+        kitchenTable.setRowHeight(25); // 행 높이 살짝 키움
+        UITheme.styleTable(kitchenTable);
 
-        tableInventory = new JTable(tableModel);
-        tableInventory.setRowHeight(30); // 행 높이 조절
-        JScrollPane scrollPane = new JScrollPane(tableInventory);
-        add(scrollPane, BorderLayout.CENTER);
+        // 0번 컬럼(ID) 숨기기
+        hideColumn(kitchenTable, 0);
+        
+        // 주문 내역 컬럼 너비 늘리기 (잘 보이라고)
+        kitchenTable.getColumnModel().getColumn(2).setPreferredWidth(300);
 
-        // 3. 하단 (기능 버튼 예시 - 추후 발주 기능 연결)
-        JPanel panelBottom = new JPanel();
-        panelBottom.add(new JLabel("※ 재고가 부족한 항목은 빨간색으로 표시됩니다 (구현 예정)"));
-        add(panelBottom, BorderLayout.SOUTH);
+        kitchenPanel.add(new JScrollPane(kitchenTable), BorderLayout.CENTER);
+
+        JPanel kitchenBtnBox = UITheme.createSectionPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10), null);
+        btnKitchenRefresh = new JButton("새로고침");
+        btnCompleteOrder = new JButton("준비 완료 (호출)");
+        UITheme.applyFilled(btnKitchenRefresh, UITheme.PRIMARY_LIGHT, Color.WHITE, false);
+        UITheme.applyFilled(btnCompleteOrder, UITheme.SUCCESS, Color.WHITE, true);
+        
+        kitchenBtnBox.add(btnKitchenRefresh);
+        kitchenBtnBox.add(btnCompleteOrder);
+        kitchenPanel.add(kitchenBtnBox, BorderLayout.SOUTH);
+        tabbedPane.addTab("주방 현황 (KDS)", kitchenPanel);
+
+
+        add(tabbedPane);
+        setVisible(true);
     }
 
-    // 데이터 셋팅 메서드
-    public void setStoreName(String name) {
-        lblTitle.setText("[" + name + "] 재고 관리 현황");
+    // 특정 컬럼 숨기기 메서드
+    private void hideColumn(JTable table, int index) {
+        TableColumn col = table.getColumnModel().getColumn(index);
+        col.setMinWidth(0);
+        col.setMaxWidth(0);
+        col.setWidth(0);
+        col.setPreferredWidth(0);
+        col.setResizable(false); // 사용자 조절 불가
     }
 
-    public DefaultTableModel getTableModel() {
-        return tableModel;
-    }
+    // Getters
+    public DefaultTableModel getInventoryModel() { return inventoryModel; }
+    public DefaultTableModel getSalesModel() { return salesModel; }
+    public DefaultTableModel getKitchenModel() { return kitchenModel; }
 
-    public void setRefreshButtonListener(ActionListener listener) {
-        btnRefresh.addActionListener(listener);
-    }
+    public JButton getBtnRefreshInventory() { return btnRefreshInventory; }
+    public JButton getBtnOrderIngredient() { return btnOrderIngredient; }
+    public JButton getBtnRefreshSales() { return btnRefreshSales; }
+    public JLabel getLblTotalSales() { return lblTotalSales; }
+    
+    public JTable getKitchenTable() { return kitchenTable; }
+    public JButton getBtnKitchenRefresh() { return btnKitchenRefresh; }
+    public JButton getBtnCompleteOrder() { return btnCompleteOrder; }
 }
