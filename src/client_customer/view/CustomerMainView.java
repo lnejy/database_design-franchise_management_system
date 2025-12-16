@@ -108,8 +108,33 @@ public class CustomerMainView extends JFrame {
                 imagePath = "/image/cola.png";
             } else if ("감자튀김".equals(menuName)) {
                 imagePath = "/image/fries.png";
+            } else if ("새우버거".equals(menuName)) {
+                imagePath = "/image/shrimp.png"; 
+            } else if ("불고기버거".equals(menuName)) {
+                imagePath = "/image/bulgogi.png"; 
+            } else if ("빅불고기버거".equals(menuName)) {
+                imagePath = "/image/bigbul.png"; 
+            } else if ("치킨버거".equals(menuName)) {
+                imagePath = "/image/chicken.png"; 
+            } else if ("스프라이트".equals(menuName)) {
+                imagePath = "/image/sprite.png"; 
+            } else if ("데리버거".equals(menuName)) {
+                imagePath = "/image/terri.png"; 
+            }  else if ("모짜렐라버거".equals(menuName)) {
+                imagePath = "/image/mozza.png"; 
+            }  else if ("에그타르트".equals(menuName)) {
+                imagePath = "/image/eggtart.png"; 
+            }else if ("윙봉".equals(menuName)) {
+                imagePath = "/image/wingbong.png"; 
+            }else if ("아메리카노".equals(menuName)) {
+                imagePath = "/image/americano.png"; 
+            }else if ("소프트콘".equals(menuName)) {
+                imagePath = "/image/soft.png"; 
+            }else if ("환타".equals(menuName)) {
+                imagePath = "/image/fanta.png"; 
+            }else if ("제로콜라".equals(menuName)) {
+                imagePath = "/image/zerocoke.png"; 
             }
-
             // 2. 이미지 경로가 설정되었다면 아이콘 로드 및 스타일 적용
             boolean imageApplied = false;
             if (imagePath != null) {

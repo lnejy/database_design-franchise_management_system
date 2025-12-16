@@ -30,7 +30,7 @@ public class DBConnection {
     private static final String USER = "root";
     
     /** 데이터베이스 비밀번호 */
-    private static final String PASSWORD = "0618";
+    private static final String PASSWORD = "1111";
 
     /**
      * 정적 초기화 블록: MySQL JDBC 드라이버 로드
