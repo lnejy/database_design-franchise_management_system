@@ -49,8 +49,14 @@ public class HQMainView extends JFrame {
         // 버튼 패널
         JPanel btnPanel = UITheme.createSectionPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10), null);
         JButton btnRefresh = new JButton("새로고침");
+        btnRefresh.setBackground(Color.BLACK);
+        btnRefresh.setBorderPainted(false);
         JButton btnApprove = new JButton("승인 (물류 배송지시)");
+        btnApprove.setBackground(Color.BLACK);
+        btnApprove.setBorderPainted(false);
         JButton btnReject = new JButton("반려");
+        btnReject.setBackground(Color.black);
+        btnReject.setBorderPainted(false);
 
         // 스타일링: 대비를 높인 공통 팔레트 적용
         UITheme.applyFilled(btnRefresh, UITheme.PRIMARY_LIGHT, Color.BLUE, false);
