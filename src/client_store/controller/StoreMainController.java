@@ -71,6 +71,7 @@ public class StoreMainController {
         model.setRowCount(0);
         Vector<Vector<Object>> data = kitchenDAO.getPendingOrders(store.getStoreId());
         for (Vector<Object> row : data) model.addRow(row);
+        view.adjustKitchenRowHeights(); // 데이터 다 넣고 나서 행 높이 자동 조절
     }
 
     // 준비 완료 처리

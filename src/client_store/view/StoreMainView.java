@@ -6,6 +6,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn; 
 import java.awt.*;
+import javax.swing.table.DefaultTableCellRenderer;
 
 public class StoreMainView extends JFrame {
     private JTabbedPane tabbedPane;
@@ -86,6 +87,31 @@ public class StoreMainView extends JFrame {
         kitchenTable.setRowHeight(25); // 행 높이 살짝 키움
         UITheme.styleTable(kitchenTable);
 
+        this.kitchenTable.getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus,
+                                                           int row, int column) {
+                JLabel lbl = (JLabel) super.getTableCellRendererComponent(
+                        table, value, isSelected, hasFocus, row, column
+                );
+
+                String text = value == null ? "" : value.toString();
+
+                // 줄바꿈 처리
+                text = text.replace("\n", "<br>");
+
+                // 옵션 부분만 빨간색
+                text = text.replaceAll("\\[(.*?)\\]", "<font color='red'>[$1]</font>");
+
+                lbl.setText("<html>" + text + "</html>");
+                return lbl;
+            }
+        });
+
+        // 옵션 줄 때문에 행 높이 조금 키우기
+        this.kitchenTable.setRowHeight(55);
+
         // 0번 컬럼(ID) 숨기기
         hideColumn(kitchenTable, 0);
         
@@ -120,6 +146,30 @@ public class StoreMainView extends JFrame {
         col.setResizable(false); // 사용자 조절 불가
     }
 
+    //행 높이 자동 조절 메서드
+    public void adjustKitchenRowHeights() {
+        int col = 2; // 주문 내역(메뉴) 컬럼
+
+        for (int row = 0; row < kitchenTable.getRowCount(); row++) {
+            // 현재 셀 렌더러로 컴포넌트 생성
+            Component comp = kitchenTable.prepareRenderer(
+                    kitchenTable.getCellRenderer(row, col),
+                    row, col
+            );
+
+            int colWidth = kitchenTable.getColumnModel().getColumn(col).getWidth();
+
+            // 렌더러 컴포넌트가 해당 폭에서 필요로 하는 높이를 계산하게 함
+            comp.setBounds(0, 0, colWidth, Integer.MAX_VALUE);
+
+            int prefH = comp.getPreferredSize().height;
+
+            // 최소 높이 + 약간 여백
+            kitchenTable.setRowHeight(row, Math.max(35, prefH + 8));
+        }
+    }
+
+
     // Getters
     public DefaultTableModel getInventoryModel() { return inventoryModel; }
     public DefaultTableModel getSalesModel() { return salesModel; }
@@ -133,4 +183,6 @@ public class StoreMainView extends JFrame {
     public JTable getKitchenTable() { return kitchenTable; }
     public JButton getBtnKitchenRefresh() { return btnKitchenRefresh; }
     public JButton getBtnCompleteOrder() { return btnCompleteOrder; }
+
+
 }

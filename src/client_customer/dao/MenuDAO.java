@@ -2,6 +2,7 @@ package client_customer.dao;
 
 import common.db.DBConnection;
 import common.dto.MenuDTO;
+import common.dto.MenuOptionDTO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -65,6 +66,35 @@ public class MenuDAO {
                         rs.getString("description"),
                         rs.getBoolean("is_sold_out")
                 ));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // 3. [추가] 메뉴 옵션 조회 메서드
+    public List<MenuOptionDTO> getOptionsByMenuId(int menuId) {
+        List<MenuOptionDTO> list = new ArrayList<>();
+
+        String sql = "SELECT option_id, option_name, delta_price " +
+                "FROM menu_option " +
+                "WHERE menu_id = ? AND is_active = true " +
+                "ORDER BY sort_order, option_id";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, menuId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new MenuOptionDTO(
+                            rs.getInt("option_id"),
+                            rs.getString("option_name"),
+                            rs.getInt("delta_price")
+                    ));
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

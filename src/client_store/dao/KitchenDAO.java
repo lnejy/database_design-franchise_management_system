@@ -11,19 +11,37 @@ public class KitchenDAO {
     // 대기 중인 주문 조회 (메뉴 내역 합쳐서 조회)
     public Vector<Vector<Object>> getPendingOrders(int storeId) {
         Vector<Vector<Object>> data = new Vector<>();
-        
-        String sql = "SELECT " +
-                     "  co.order_id, " +
-                     "  co.order_number, " +
-                     "  co.total_amount, " +
-                     "  co.order_time, " +
-                     "  GROUP_CONCAT(CONCAT(m.menu_name, IF(od.is_set, '(세트)', ''), ' x', od.quantity) SEPARATOR ', ') AS menu_summary " +
-                     "FROM customer_order co " +
-                     "JOIN order_detail od ON co.order_id = od.order_id " +
-                     "JOIN menu m ON od.menu_id = m.menu_id " +
-                     "WHERE co.store_id = ? AND co.status = 'WAITING' " +
-                     "GROUP BY co.order_id " +
-                     "ORDER BY co.order_time ASC";
+
+        String sql =
+                "SELECT " +
+                        "  co.order_id, " +
+                        "  co.order_number, " +
+                        "  co.total_amount, " +
+                        "  co.order_time, " +
+                        "  GROUP_CONCAT( " +
+                        "    CONCAT( " +
+                        "      m.menu_name, " +
+                        "      IF(od.is_set, '(세트)', ''), " +
+                        "      ' x', od.quantity, " +
+                        "      IF(opt.opt_names IS NULL, '', CONCAT(' [', opt.opt_names, ']')) " +
+                        "    ) " +
+                        "    SEPARATOR '\\n' " +
+                        "  ) AS menu_summary " +
+                        "FROM customer_order co " +
+                        "JOIN order_detail od ON co.order_id = od.order_id " +
+                        "JOIN menu m ON od.menu_id = m.menu_id " +
+                        "LEFT JOIN ( " +
+                        "  SELECT " +
+                        "    odo.detail_id, " +
+                        "    GROUP_CONCAT(mo.option_name ORDER BY mo.sort_order SEPARATOR ', ') AS opt_names " +
+                        "  FROM order_detail_option odo " +
+                        "  JOIN menu_option mo ON mo.option_id = odo.option_id " +
+                        "  GROUP BY odo.detail_id " +
+                        ") opt ON opt.detail_id = od.detail_id " +
+                        "WHERE co.store_id = ? AND co.status = 'WAITING' " +
+                        "GROUP BY co.order_id, co.order_number, co.total_amount, co.order_time " +
+                        "ORDER BY co.order_time ASC";
+
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {

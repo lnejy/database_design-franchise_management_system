@@ -14,6 +14,8 @@ public class OrderDAO {
         PreparedStatement pstmtDetail = null;
         PreparedStatement pstmtStock = null;
         PreparedStatement pstmtSale = null;
+        PreparedStatement pstmtDetailOption = null;
+        PreparedStatement pstmtStockOption = null;
         ResultSet rs = null;
 
         try {
@@ -44,8 +46,23 @@ public class OrderDAO {
                               "JOIN menu_recipe mr ON si.ingredient_id = mr.ingredient_id " +
                               "SET si.quantity = si.quantity - (mr.required_quantity * ?) " +
                               "WHERE si.store_id = ? AND mr.menu_id = ?";
-            
-            pstmtDetail = conn.prepareStatement(sqlDetail);
+
+            String sqlDetailOption =
+                    "INSERT INTO order_detail_option (detail_id, option_id, option_qty) VALUES (?, ?, ?)";
+
+            String sqlStockOption =
+                    "UPDATE store_inventory si " +
+                            "JOIN menu_option mo ON si.ingredient_id = mo.ingredient_id " +
+                            "SET si.quantity = si.quantity - (mo.delta_quantity * ? * ?) " +
+                            "WHERE si.store_id = ? AND mo.option_id = ?";
+
+            pstmtStockOption = conn.prepareStatement(sqlStockOption);
+
+
+            pstmtDetailOption = conn.prepareStatement(sqlDetailOption);
+
+
+            pstmtDetail = conn.prepareStatement(sqlDetail, Statement.RETURN_GENERATED_KEYS);
             pstmtStock = conn.prepareStatement(sqlStock);
 
             for (CartItemDTO item : cartItems) {
@@ -58,11 +75,36 @@ public class OrderDAO {
                 pstmtDetail.setInt(6, item.getSubTotal());
                 pstmtDetail.executeUpdate();
 
+                //detail_id 얻기
+                int detailId = 0;
+                try (ResultSet drs = pstmtDetail.getGeneratedKeys()) {
+                    if (drs.next()) detailId = drs.getInt(1);
+                }
+
                 // 재고 차감
                 pstmtStock.setInt(1, item.getQuantity());
                 pstmtStock.setInt(2, storeId);
                 pstmtStock.setInt(3, item.getMenu().getMenuId());
                 pstmtStock.executeUpdate();
+
+                // 옵션 저장 + 옵션 재고 반영
+                if (item.getOptions() != null) {
+                    for (var opt : item.getOptions()) {
+
+                        // (a) order_detail_option 저장
+                        pstmtDetailOption.setInt(1, detailId);
+                        pstmtDetailOption.setInt(2, opt.getOptionId());
+                        pstmtDetailOption.setInt(3, 1); // option_qty (지금은 1 고정)
+                        pstmtDetailOption.executeUpdate();
+
+                        // (b) 옵션 재고 반영
+                        pstmtStockOption.setInt(1, item.getQuantity()); // 주문 수량
+                        pstmtStockOption.setInt(2, 1);                  // option_qty
+                        pstmtStockOption.setInt(3, storeId);
+                        pstmtStockOption.setInt(4, opt.getOptionId());
+                        pstmtStockOption.executeUpdate();
+                    }
+                }
             }
 
             // 4. 매출 기록

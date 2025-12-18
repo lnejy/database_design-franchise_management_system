@@ -143,45 +143,87 @@ public class CustomerMainView extends JFrame {
         lblTotal = new JLabel("총 결제금액: 0원   ");
         lblTotal.setFont(UITheme.FONT_TITLE);
 
+        // [추가] 선택 삭제 버튼
+        JButton btnRemove = new JButton("선택 삭제");
+        btnRemove.setFont(UITheme.FONT_BOLD);
+        btnRemove.setPreferredSize(new Dimension(110, 40));
+        btnRemove.addActionListener(e -> removeSelectedItem(cartTable));
+
         JButton btnPay = new JButton("결제하기");
         btnPay.setFont(UITheme.FONT_BOLD);
         btnPay.setBackground(Color.BLACK);
         btnPay.setForeground(Color.WHITE);
+        btnPay.setOpaque(true);
+        btnPay.setContentAreaFilled(true);
+        btnPay.setBorderPainted(false);
+        btnPay.setFocusPainted(false);
+
         btnPay.setPreferredSize(new Dimension(130, 40));
         btnPay.addActionListener(e -> processPayment());
 
         payPanel.add(lblTotal);
+        payPanel.add(btnRemove);
         payPanel.add(btnPay);
         bottomPanel.add(payPanel, BorderLayout.SOUTH);
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
     private void onMenuClick(MenuDTO menu) {
-        if (menu.getSetPrice() == 0) {
-            addToCart(menu, false);
-            return;
-        }
-        Object[] options = {"단품 (" + menu.getPrice() + ")", "세트 (" + menu.getSetPrice() + ")"};
-        int choice = JOptionPane.showOptionDialog(this, "옵션을 선택하세요.", "주문",
-                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-        if (choice == JOptionPane.YES_OPTION) addToCart(menu, false);
-        else if (choice == JOptionPane.NO_OPTION) addToCart(menu, true);
-    }
+        boolean isSet = false;
 
-    private void addToCart(MenuDTO menu, boolean isSet) {
-        cartList.add(new CartItemDTO(menu, 1, isSet));
+        if (menu.getSetPrice() != 0) {
+            Object[] options = {"단품 (" + menu.getPrice() + ")", "세트 (" + menu.getSetPrice() + ")"};
+            int choice = JOptionPane.showOptionDialog(this, "옵션을 선택하세요.", "주문",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+
+            if (choice == JOptionPane.CLOSED_OPTION) return;
+            isSet = (choice == JOptionPane.NO_OPTION);
+        }
+
+        // 재료 옵션 선택
+        List<common.dto.MenuOptionDTO> selectedOptions = showOptionDialog(menu);
+        if (selectedOptions == null) return; // 취소
+
+        addToCart(menu, isSet, selectedOptions);    }
+
+    private void addToCart(MenuDTO menu, boolean isSet, List<common.dto.MenuOptionDTO> options) {
+        cartList.add(new CartItemDTO(menu, 1, isSet, options));
         refreshCart();
     }
+
+    //선택 메뉴 삭제
+    private void removeSelectedItem(JTable cartTable) {
+        int row = cartTable.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "삭제할 항목을 선택하세요.");
+            return;
+        }
+        cartList.remove(row);
+        refreshCart();
+    }
+
 
     private void refreshCart() {
         tableModel.setRowCount(0);
         int total = 0;
+
         for (CartItemDTO item : cartList) {
-            tableModel.addRow(new Object[]{item.getMenu().getMenuName(), item.isSet() ? "세트" : "단품", 1, String.format("%,d", item.getSubTotal())});
+            String type = item.isSet() ? "세트" : "단품";
+            String opt = item.getOptionSummary();
+            String optionText = opt.isEmpty() ? type : (type + " | " + opt);
+
+            tableModel.addRow(new Object[]{
+                    item.getMenu().getMenuName(),
+                    optionText,
+                    item.getQuantity(),
+                    String.format("%,d", item.getSubTotal())
+            });
+
             total += item.getSubTotal();
         }
         lblTotal.setText("총 결제금액: " + String.format("%,d", total) + "원   ");
     }
+
 
     private void processPayment() {
         if (cartList.isEmpty()) return;
@@ -214,4 +256,35 @@ public class CustomerMainView extends JFrame {
             return new ImageIcon(new ImageIcon(imgURL).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
         } catch (Exception e) { return null; }
     }
+
+    private List<common.dto.MenuOptionDTO> showOptionDialog(MenuDTO menu) {
+        List<common.dto.MenuOptionDTO> optionList = menuDAO.getOptionsByMenuId(menu.getMenuId());
+        if (optionList == null || optionList.isEmpty()) return new ArrayList<>();
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        List<JCheckBox> checks = new ArrayList<>();
+        for (var opt : optionList) {
+            String text = opt.getOptionName();
+            if (opt.getDeltaPrice() > 0) text += " (+" + opt.getDeltaPrice() + "원)";
+            JCheckBox cb = new JCheckBox(text);
+            checks.add(cb);
+            panel.add(cb);
+        }
+
+        int result = JOptionPane.showConfirmDialog(
+                this, panel, "옵션 선택 - " + menu.getMenuName(),
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (result != JOptionPane.OK_OPTION) return null; // 취소면 null로 처리
+
+        List<common.dto.MenuOptionDTO> selected = new ArrayList<>();
+        for (int i = 0; i < checks.size(); i++) {
+            if (checks.get(i).isSelected()) selected.add(optionList.get(i));
+        }
+        return selected;
+    }
+
 }

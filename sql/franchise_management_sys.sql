@@ -53,6 +53,25 @@ CREATE TABLE menu_recipe (
     FOREIGN KEY (ingredient_id) REFERENCES ingredient(ingredient_id) ON DELETE CASCADE
 );
 
+
+-- [추가] 4-1. 메뉴 옵션 정의 (Menu Option)
+CREATE TABLE menu_option (
+    option_id INT AUTO_INCREMENT PRIMARY KEY,
+    menu_id INT NOT NULL,
+    ingredient_id INT NOT NULL,
+    option_name VARCHAR(50) NOT NULL,     -- 예: '피클 제외', '양상추 추가'
+    option_type ENUM('REMOVE','ADD') NOT NULL,  -- 제외/추가
+    delta_quantity INT NOT NULL,          -- 재고 변화량: 제거는 음수, 추가는 양수
+    is_active BOOLEAN DEFAULT TRUE,
+    sort_order INT DEFAULT 0,
+
+    FOREIGN KEY (menu_id) REFERENCES menu(menu_id) ON DELETE CASCADE,
+    FOREIGN KEY (ingredient_id) REFERENCES ingredient(ingredient_id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_menu_option_menu ON menu_option(menu_id);
+
+
 -- 5. 매장 재고 (Store Inventory)
 CREATE TABLE store_inventory (
     store_id INT NOT NULL,
@@ -102,6 +121,25 @@ CREATE TABLE order_detail (
     FOREIGN KEY (order_id) REFERENCES customer_order(order_id) ON DELETE CASCADE,
     FOREIGN KEY (menu_id) REFERENCES menu(menu_id)
 );
+
+
+-- [추가] 8-1. 주문 옵션 선택 내역 (Order Detail Option)
+CREATE TABLE order_detail_option (
+    detail_option_id INT AUTO_INCREMENT PRIMARY KEY,
+    detail_id INT NOT NULL,
+    option_id INT NOT NULL,
+    option_qty INT DEFAULT 1, -- 확장용(같은 옵션 2번 등), 보통 1
+
+    FOREIGN KEY (detail_id) REFERENCES order_detail(detail_id) ON DELETE CASCADE,
+    FOREIGN KEY (option_id) REFERENCES menu_option(option_id) ON DELETE CASCADE,
+    UNIQUE KEY uq_detail_option (detail_id, option_id)
+);
+
+CREATE INDEX idx_odo_detail ON order_detail_option(detail_id);
+
+ALTER TABLE menu_option
+ADD COLUMN delta_price INT NOT NULL DEFAULT 0;
+
 
 -- 9. 매출 (Store Sale)
 CREATE TABLE store_sale (
@@ -234,6 +272,122 @@ INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
 -- 제로콜라(16) = 제로콜라 시럽 200ml
 INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
 (16, 21, 200);
+
+
+
+-- 대상 메뉴_id: 1,2,3,4,5,6,10,11 (버거류)
+-- 재료_id: 피클(11), 양상추(12), 양파(13), 케찹(9), 마요(6), 불고기소스(8), 타르타르(10), 치즈(3)
+
+INSERT INTO menu_option
+(menu_id, ingredient_id, option_name, option_type, delta_quantity, delta_price, sort_order)
+VALUES
+
+-- 1) 치즈버거 (menu_id=1)
+
+(1, 3,  '치즈 제외',     'REMOVE', -1,  0,   10),
+(1, 9,  '케찹 제외',     'REMOVE', -10, 0,   20),
+(1, 12, '양상추 제외',   'REMOVE', -10, 0,   30),
+
+(1, 3,  '치즈 추가',     'ADD',     1,  500, 40),
+(1, 9,  '케찹 추가',     'ADD',     10, 0,   50),
+(1, 12, '양상추 추가',   'ADD',     10, 0,   60),
+(1, 13, '양파 추가',     'ADD',     10, 0,   70),
+(1, 11, '피클 추가',     'ADD',     30, 0,   80),
+
+-- 2) 불고기버거 (menu_id=2)
+
+(2, 6,  '마요네즈 제외', 'REMOVE', -10, 0,   10),
+(2, 12, '양상추 제외',   'REMOVE', -10, 0,   20),
+(2, 8,  '불고기소스 제외','REMOVE', -10, 0,  30),
+(2, 13, '양파 제외',     'REMOVE', -10, 0,   40),
+
+(2, 6,  '마요네즈 추가', 'ADD',     10, 0,   50),
+(2, 8,  '불고기소스 추가','ADD',    10, 0,   60),
+(2, 12, '양상추 추가',   'ADD',     10, 0,   70),
+(2, 13, '양파 추가',     'ADD',     10, 0,   80),
+(2, 11, '피클 추가',     'ADD',     30, 0,   90),
+(2, 3,  '치즈 추가',     'ADD',     1,  500, 100),
+
+-- 3) 새우버거 (menu_id=3)
+
+(3, 11, '피클 제외',     'REMOVE', -30, 0,   10),
+(3, 10, '타르타르소스 제외','REMOVE', -10, 0, 20),
+(3, 12, '양상추 제외',   'REMOVE', -10, 0,   30),
+(3, 13, '양파 제외',     'REMOVE', -10, 0,   40),
+
+(3, 11, '피클 추가',     'ADD',     30, 0,   50),
+(3, 10, '타르타르소스 추가','ADD',  10, 0,   60),
+(3, 12, '양상추 추가',   'ADD',     10, 0,   70),
+(3, 13, '양파 추가',     'ADD',     10, 0,   80),
+(3, 3,  '치즈 추가',     'ADD',     1,  500, 90),
+(3, 9,  '케찹 추가',     'ADD',     10, 0,   100),
+
+-- 4) 더블버거 (menu_id=4)
+
+(4, 3,  '치즈 제외',     'REMOVE', -1,  0,   10),
+(4, 9,  '케찹 제외',     'REMOVE', -10, 0,   20),
+(4, 12, '양상추 제외',   'REMOVE', -10, 0,   30),
+
+(4, 3,  '치즈 추가',     'ADD',     1,  500, 40),
+(4, 9,  '케찹 추가',     'ADD',     10, 0,   50),
+(4, 12, '양상추 추가',   'ADD',     10, 0,   60),
+(4, 13, '양파 추가',     'ADD',     10, 0,   70),
+(4, 11, '피클 추가',     'ADD',     30, 0,   80),
+
+-- 5) 치킨버거 (menu_id=5)
+
+(5, 6,  '마요네즈 제외', 'REMOVE', -10, 0,   10),
+(5, 12, '양상추 제외',   'REMOVE', -10, 0,   20),
+(5, 8,  '불고기소스 제외','REMOVE', -10, 0,  30),
+
+(5, 6,  '마요네즈 추가', 'ADD',     10, 0,   40),
+(5, 8,  '불고기소스 추가','ADD',    10, 0,   50),
+(5, 12, '양상추 추가',   'ADD',     10, 0,   60),
+(5, 13, '양파 추가',     'ADD',     10, 0,   70),
+(5, 11, '피클 추가',     'ADD',     30, 0,   80),
+(5, 3,  '치즈 추가',     'ADD',     1,  500, 90),
+
+
+-- 6) 빅불고기버거 (menu_id=6)
+
+(6, 6,  '마요네즈 제외', 'REMOVE', -10, 0,   10),
+(6, 12, '양상추 제외',   'REMOVE', -10, 0,   20),
+(6, 8,  '불고기소스 제외','REMOVE', -20, 0,  30),
+(6, 13, '양파 제외',     'REMOVE', -10, 0,   40),
+
+(6, 6,  '마요네즈 추가', 'ADD',     10, 0,   50),
+(6, 8,  '불고기소스 추가','ADD',    10, 0,   60), -- 추가는 10g 단위
+(6, 12, '양상추 추가',   'ADD',     10, 0,   70),
+(6, 13, '양파 추가',     'ADD',     10, 0,   80),
+(6, 11, '피클 추가',     'ADD',     30, 0,   90),
+(6, 3,  '치즈 추가',     'ADD',     1,  500, 100),
+
+-- 10) 데리버거 (menu_id=10)
+
+(10, 6,  '마요네즈 제외', 'REMOVE', -10, 0,   10),
+(10, 12, '양상추 제외',   'REMOVE', -10, 0,   20),
+(10, 8,  '불고기소스 제외','REMOVE', -10, 0,  30),
+
+(10, 6,  '마요네즈 추가', 'ADD',     10, 0,   40),
+(10, 8,  '불고기소스 추가','ADD',    10, 0,   50),
+(10, 12, '양상추 추가',   'ADD',     10, 0,   60),
+(10, 13, '양파 추가',     'ADD',     10, 0,   70),
+(10, 11, '피클 추가',     'ADD',     30, 0,   80),
+(10, 3,  '치즈 추가',     'ADD',     1,  500, 90),
+
+-- 11) 모짜렐라버거 (menu_id=11)
+
+(11, 3,  '치즈 제외',     'REMOVE', -1,  0,   10),
+
+(11, 3,  '치즈 추가',     'ADD',     1,  500, 20),
+(11, 9,  '케찹 추가',     'ADD',     10, 0,   30),
+(11, 6,  '마요네즈 추가', 'ADD',     10, 0,   40),
+(11, 12, '양상추 추가',   'ADD',     10, 0,   50),
+(11, 13, '양파 추가',     'ADD',     10, 0,   60),
+(11, 11, '피클 추가',     'ADD',     30, 0,   70);
+
+
+
 
 -- 5. 매장 초기 재고 세팅
 
