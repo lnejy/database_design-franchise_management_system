@@ -125,7 +125,25 @@ INSERT INTO ingredient (ingredient_name, ingredient_code, category_name, unit) V
 ('소고기 패티', 'ING-002', '육류', '장'),
 ('체다 치즈', 'ING-003', '유제품', '장'),
 ('콜라 시럽', 'ING-004', '음료', 'ml'),
-('감자튀김', 'ING-005', '사이드', 'g');
+('감자튀김', 'ING-005', '사이드', 'g'),
+('마요네즈', 'ING-006', '소스', 'g'),
+('머스타드', 'ING-007', '소스', 'g'),
+('불고기 소스', 'ING-008', '소스', 'g'),
+('케찹 소스', 'ING-009', '소스', 'g'),
+('타르타르소스', 'ING-010', '소스', 'g'),
+('피클', 'ING-011', '채소', 'g'),
+('양상추', 'ING-012', '채소', 'g'),
+('양파', 'ING-013', '채소', 'g'),
+('치킨 패티', 'ING-014', '육류', '장'),
+('새우 패티', 'ING-015', '새우', '장'),
+('모짜렐라 패티', 'ING-016', '유제품', '장'),
+('에그타르트', 'ING-017', '사이드', '개'),
+('윙봉', 'ING-018', '사이드', '개'),
+('아이스크림 믹스', 'ING-019', '사이드', 'ml'),
+('환타 시럽', 'ING-020', '음료', 'ml'),
+('제로콜라 시럽', 'ING-021', '음료', 'ml'),
+('스프라이트 시럽', 'ING-022', '음료', 'ml')
+;
 
 -- 3. 메뉴 생성 (세트 가격 포함)
 INSERT INTO menu (menu_name, menu_code, price, set_price, category_name, is_recommended) VALUES 
@@ -144,21 +162,113 @@ INSERT INTO menu (menu_name, menu_code, price, set_price, category_name, is_reco
 ('윙봉', 'MN-013', 4000, 0, '사이드', FALSE),
 ('소프트콘', 'MN-015', 1000, 0, '사이드', FALSE),
 ('환타', 'MN-016', 2000, 0, '음료', FALSE),
-('제로콜라', 'MN-016', 2000, 0, '음료', FALSE);
+('제로콜라', 'MN-017', 2000, 0, '음료', FALSE);
 
 
 -- 4. 레시피 연결
--- 치즈버거(1) = 빵1 + 패티1 + 치즈1
-INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES (1, 1, 1), (1, 2, 1), (1, 3, 1);
--- 더블버거(2) = 빵1 + 패티2 + 치즈1
-INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES (2, 1, 1), (2, 2, 2), (2, 3, 1);
--- 감자튀김(3) = 감자 200g
-INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES (3, 5, 200);
--- 콜라(4) = 시럽 200ml
-INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES (4, 4, 200);
+-- menu_id:
+-- 1 치즈버거, 2 불고기버거, 3 새우버거, 4 더블버거, 5 치킨버거, 6 빅불고기버거,
+-- 7 감자튀김, 8 코카콜라, 9 스프라이트, 10 데리버거, 11 모짜렐라버거,
+-- 12 에그타르트, 13 윙봉, 14 소프트콘, 15 환타, 16 제로콜라
+
+-- 치즈버거(1) = 빵1 + 패티1 + 치즈1 + 케찹 10g + 양상추 10g
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(1, 1, 1), (1, 2, 1), (1, 3, 1), (1, 9, 10), (1, 12, 10);
+
+-- 불고기버거(2) = 빵1 + 패티1 + 마요네즈 10g + 양상추 10g + 불고기소스 10g + 양파 10g
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(2, 1, 1), (2, 2, 1), (2, 6, 10), (2, 12, 10), (2, 8, 10), (2, 13, 10);
+
+-- 새우버거(3) = 빵1 + 새우패티1 + 피클 30g + 타르타르소스 10g + 양상추 10g + 양파 10g
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(3, 1, 1), (3, 15, 1), (3, 11, 30), (3, 10, 10), (3, 12, 10), (3, 13, 10);
+
+-- 더블버거(4) = 빵1 + 패티2 + 치즈1 + 케찹 10g + 양상추 10g
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(4, 1, 1), (4, 2, 2), (4, 3, 1), (4, 9, 10), (4, 12, 10);
+
+-- 치킨버거(5) = 빵1 + 치킨패티1 + 마요네즈 10g + 양상추 10g + 불고기소스 10g
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(5, 1, 1), (5, 14, 1), (5, 6, 10), (5, 12, 10), (5, 8, 10);
+
+-- 빅불고기버거(6) = 빵1 + 패티2 + 마요네즈 10g + 양상추 10g + 불고기소스 20g + 양파 10g
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(6, 1, 1), (6, 2, 2), (6, 6, 10), (6, 12, 10), (6, 8, 20), (6, 13, 10);
+
+-- 감자튀김(7) = 감자튀김 200g
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(7, 5, 200);
+
+-- 코카콜라(8) = 콜라 시럽 200ml
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(8, 4, 200);
+
+-- 스프라이트(9) = 스프라이트 시럽 200ml
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(9, 22, 200);
+
+-- 데리버거(10) = 빵1 + 패티1 + 마요네즈 10g + 양상추 10g + 불고기소스 10g
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(10, 1, 1), (10, 2, 1), (10, 6, 10), (10, 12, 10), (10, 8, 10);
+
+-- 모짜렐라버거(11) = 빵1 + 패티1 + 모짜렐라 패티 1 + 치즈 1
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(11, 1, 1), (11, 2, 1), (11, 16, 1), (11, 3, 1);
+
+-- 에그타르트(12) = 에그타르트 1개
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(12, 17, 1);
+
+-- 윙봉(13) = 윙봉 4개
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(13, 18, 4);
+
+-- 소프트콘(14) = 아이스크림 믹스 90ml
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(14, 19, 90);
+
+-- 환타(15) = 환타 시럽 200ml
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(15, 20, 200);
+
+-- 제로콜라(16) = 제로콜라 시럽 200ml
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(16, 21, 200);
 
 -- 5. 매장 초기 재고 세팅
+
+-- 단위: 빵/패티/치즈/사이드(개/장), 시럽/믹스(ml), 소스/채소/감튀(g)
 INSERT INTO store_inventory (store_id, ingredient_id, quantity) VALUES
-(1, 1, 100), (1, 2, 100), (1, 3, 100), (1, 4, 5000), (1, 5, 1000);
+-- 빵류/패티류/치즈(개/장)
+(1, 1, 200),   -- 햄버거 빵 (개)
+(1, 2, 200),   -- 소고기 패티 (장)
+(1, 3, 150),   -- 체다 치즈 (장)
+(1, 14, 150),  -- 치킨 패티 (장)
+(1, 15, 120),  -- 새우 패티 (장)
+(1, 16, 80),   -- 모짜렐라 패티 (장)
+
+-- 음료 시럽/아이스크림 믹스(ml)
+(1, 4, 20000),  -- 콜라 시럽 (ml)
+(1, 20, 12000), -- 환타 시럽 (ml)
+(1, 21, 12000), -- 제로콜라 시럽 (ml)
+(1, 22, 12000), -- 스프라이트 시럽 (ml)
+(1, 19, 8000),  -- 아이스크림 믹스 (ml)
+
+-- 사이드 원재료/완제품(개/g)
+(1, 5, 30000),  -- 감자튀김 (g)
+(1, 17, 80),    -- 에그타르트 (개)
+(1, 18, 200),   -- 윙봉 (개)
+
+-- 소스류(g)
+(1, 6, 5000),  -- 마요네즈 (g)
+(1, 7, 3000),  -- 머스타드 (g)
+(1, 8, 5000),  -- 불고기 소스 (g)
+(1, 9, 5000),  -- 케찹 소스 (g)
+(1, 10, 4000), -- 타르타르소스 (g)
+
+-- 채소류(g)
+(1, 11, 3000), -- 피클 (g)
+(1, 12, 4000), -- 양상추 (g)
+(1, 13, 4000); -- 양파 (g)
 
 COMMIT;
