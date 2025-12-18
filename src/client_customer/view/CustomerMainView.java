@@ -12,14 +12,13 @@ import java.awt.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CustomerMainView extends JFrame {
     private int storeId;
     private List<CartItemDTO> cartList = new ArrayList<>();
     private DefaultTableModel tableModel;
     private JLabel lblTotal;
-
-    // 알림용 변수
     private int myOrderId = -1;
     private Timer notificationTimer;
     private MenuDAO menuDAO = new MenuDAO();
@@ -27,171 +26,120 @@ public class CustomerMainView extends JFrame {
     public CustomerMainView(int storeId, String storeName) {
         this.storeId = storeId;
         setTitle("키오스크 - " + storeName);
-        setSize(800, 750);
+        setSize(850, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        getContentPane().setLayout(new BorderLayout());
         getContentPane().setBackground(UITheme.BASE_BG);
 
-        // ---------------------------------------------------------
-        // 1. 상단: 타이틀 + 인기 메뉴 Top 3
-        // ---------------------------------------------------------
-        JPanel topPanel = UITheme.createSectionPanel(new BorderLayout(), null);
-
+        // 상단 타이틀
         JLabel title = new JLabel("어서오세요! " + storeName + "입니다.", SwingConstants.CENTER);
         title.setFont(UITheme.FONT_TITLE);
-        title.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        topPanel.add(title, BorderLayout.NORTH);
+        title.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
+        add(title, BorderLayout.NORTH);
 
-        JPanel bestMenuPanel = UITheme.createSectionPanel(new BorderLayout(), "🔥 우리 매장 인기 메뉴 Top 3 🔥");
-        bestMenuPanel.setPreferredSize(new Dimension(800, 120));
+        // 중앙: 카테고리 탭 패널
+        setupCategoryTabbedPane();
 
-        JPanel bestItemsBox = new JPanel(new GridLayout(1, 3, 15, 0));
-        bestItemsBox.setBackground(UITheme.BASE_BG);
-        List<MenuDTO> topMenus = menuDAO.getTopMenus();
+        // 하단: 장바구니 및 결제
+        setupBottomPanel();
 
-        if (topMenus.isEmpty()) {
-            JLabel lblEmpty = new JLabel("아직 인기 메뉴 데이터가 없습니다.", SwingConstants.CENTER);
-            lblEmpty.setFont(UITheme.FONT_REGULAR);
-            bestMenuPanel.add(lblEmpty, BorderLayout.CENTER);
-        } else {
-            for (MenuDTO m : topMenus) {
-                JButton btn = new JButton("<html><center><b>" + m.getMenuName() + "</b><br>🏆 BEST</center></html>");
-                btn.setBackground(UITheme.ACCENT_ORANGE);
-                btn.setForeground(new Color(60, 40, 25));
-                btn.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
-                btn.setFocusPainted(false);
-                btn.setOpaque(true);
-                btn.setBorderPainted(false);
-                btn.addActionListener(e -> onMenuClick(m));
-                bestItemsBox.add(btn);
-            }
-            bestMenuPanel.add(bestItemsBox, BorderLayout.CENTER);
-        }
+        setVisible(true);
+    }
 
-        JPanel paddingPanel = new JPanel(new BorderLayout());
-        paddingPanel.add(bestMenuPanel, BorderLayout.CENTER);
-        paddingPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+    private void setupCategoryTabbedPane() {
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.setFont(new Font("맑은 고딕", Font.BOLD, 16));
 
-        topPanel.add(paddingPanel, BorderLayout.SOUTH);
-        add(topPanel, BorderLayout.NORTH);
-
-        // ---------------------------------------------------------
-        // 2. 중앙: 전체 메뉴판 (이미지 일괄 적용)
-        //    - 한 줄에 메뉴 3개씩 배치 (3열 GridLayout)
-        //    - 가로 스크롤은 비활성화하고, 세로 스크롤만 사용
-        // ---------------------------------------------------------
-        JPanel menuPanel = UITheme.createSectionPanel(new GridLayout(0, 3, 15, 15), "전체 메뉴");
         List<MenuDTO> allMenus = menuDAO.getAllMenus();
 
-        for (MenuDTO m : allMenus) {
-            // 텍스트 HTML (이름 크게, 가격 작게) + 이름 검정, 가격 붉은색
-            String labelHtml =
-                    "<html><center>"
-                            + "<h3 style='margin:0'><font color='black'>" + m.getMenuName() + "</font></h3>"
-                            + "<span style='font-size:11px'><font color='red'>" + String.format("%,d", m.getPrice()) + "원</font></span>"
-                            + "</center></html>";
+        // 1. 전체보기
+        tabbedPane.addTab(" 전체보기 ", createMenuGridPanel(allMenus));
 
+        // 2. 버거 (이름에 '버거'가 들어간 메뉴)
+        tabbedPane.addTab("버거 ", createMenuGridPanel(
+                allMenus.stream().filter(m -> m.getMenuName().contains("버거")).collect(Collectors.toList())
+        ));
+
+        // 3. 음료
+        tabbedPane.addTab("음료 ", createMenuGridPanel(
+                allMenus.stream().filter(m ->
+                        m.getMenuName().contains("콜라") || m.getMenuName().contains("사이다") ||
+                                m.getMenuName().contains("환타") || m.getMenuName().contains("음료") ||
+                                m.getMenuName().contains("커피") || m.getMenuName().contains("스프라이트") ||
+                                m.getMenuName().contains("아메리카노")
+                ).collect(Collectors.toList())
+        ));
+
+        // 4. 사이드
+        tabbedPane.addTab("사이드 ", createMenuGridPanel(
+                allMenus.stream().filter(m ->
+                        !m.getMenuName().contains("버거") && !m.getMenuName().contains("콜라") &&
+                                !m.getMenuName().contains("사이다") && !m.getMenuName().contains("환타") &&
+                                !m.getMenuName().contains("스프라이트")
+                ).collect(Collectors.toList())
+        ));
+
+        add(tabbedPane, BorderLayout.CENTER);
+    }
+
+    private JScrollPane createMenuGridPanel(List<MenuDTO> menus) {
+        JPanel panel = new JPanel(new GridLayout(0, 3, 10, 10));
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        for (MenuDTO m : menus) {
+            String labelHtml = "<html><center><b>" + m.getMenuName() + "</b><br>"
+                    + "<font color='red'>" + String.format("%,d", m.getPrice()) + "원</font></center></html>";
 
             JButton btn = new JButton(labelHtml);
-            btn.setFont(UITheme.FONT_REGULAR);
-            btn.setFocusPainted(false);
+            btn.setPreferredSize(new Dimension(200, 220));
+            btn.setBackground(Color.WHITE);
+            btn.setVerticalTextPosition(SwingConstants.BOTTOM);
+            btn.setHorizontalTextPosition(SwingConstants.CENTER);
 
-            // 1. 메뉴 이름에 따라 이미지 경로 결정
-            String imagePath = null;
-            String menuName = m.getMenuName();
-
-            if ("더블버거".equals(menuName)) {
-                imagePath = "/image/double.png";
-            } else if ("치즈버거".equals(menuName)) {
-                imagePath = "/image/cheese.png";
-            } else if ("코카콜라".equals(menuName)) {
-                imagePath = "/image/cola.png";
-            } else if ("감자튀김".equals(menuName)) {
-                imagePath = "/image/fries.png";
-            } else if ("새우버거".equals(menuName)) {
-                imagePath = "/image/shrimp.png"; 
-            } else if ("불고기버거".equals(menuName)) {
-                imagePath = "/image/bulgogi.png"; 
-            } else if ("빅불고기버거".equals(menuName)) {
-                imagePath = "/image/bigbul.png"; 
-            } else if ("치킨버거".equals(menuName)) {
-                imagePath = "/image/chicken.png"; 
-            } else if ("스프라이트".equals(menuName)) {
-                imagePath = "/image/sprite.png"; 
-            } else if ("데리버거".equals(menuName)) {
-                imagePath = "/image/terri.png"; 
-            }  else if ("모짜렐라버거".equals(menuName)) {
-                imagePath = "/image/mozza.png"; 
-            }  else if ("에그타르트".equals(menuName)) {
-                imagePath = "/image/eggtart.png"; 
-            }else if ("윙봉".equals(menuName)) {
-                imagePath = "/image/wingbong.png"; 
-            }else if ("아메리카노".equals(menuName)) {
-                imagePath = "/image/americano.png"; 
-            }else if ("소프트콘".equals(menuName)) {
-                imagePath = "/image/soft.png"; 
-            }else if ("환타".equals(menuName)) {
-                imagePath = "/image/fanta.png"; 
-            }else if ("제로콜라".equals(menuName)) {
-                imagePath = "/image/zerocoke.png"; 
-            }
-            // 2. 이미지 경로가 설정되었다면 아이콘 로드 및 스타일 적용
-            boolean imageApplied = false;
+            String imagePath = getImagePath(m.getMenuName());
             if (imagePath != null) {
-                ImageIcon icon = loadResizedIcon(imagePath, 240, 160);
-                if (icon != null) {
-                    btn.setIcon(icon);
-                    // 텍스트를 이미지 중앙 하단으로
-                    btn.setHorizontalTextPosition(JButton.CENTER);
-                    btn.setVerticalTextPosition(JButton.BOTTOM);
-
-                    // 배경 투명화 + 테두리 제거
-                    btn.setContentAreaFilled(false);
-                    btn.setBorderPainted(false);
-
-                    // 배경 그림 위니까 글씨는 흰색
-                    btn.setForeground(Color.WHITE);
-                    imageApplied = true;
-                }
+                btn.setIcon(loadResizedIcon(imagePath, 150, 110));
             }
-
-            // 3. 이미지가 없는 일반 메뉴(혹은 로드 실패) 스타일
-            if (!imageApplied) {
-                btn.setBackground(Color.WHITE);
-                btn.setForeground(Color.BLACK);
-                btn.setOpaque(true);
-                btn.setBorderPainted(false);
-            }
-
-            // 3개씩 배치되는 카드형 버튼이므로, 세로 높이만 적당히 고정
-            btn.setPreferredSize(new Dimension(240, 200));
 
             btn.addActionListener(e -> onMenuClick(m));
-            menuPanel.add(btn);
+            panel.add(btn);
         }
 
-        JScrollPane menuScroll = new JScrollPane(menuPanel);
-        menuScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        menuScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-        add(menuScroll, BorderLayout.CENTER);
+        JScrollPane scroll = new JScrollPane(panel);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+        return scroll;
+    }
 
-        // ---------------------------------------------------------
-        // 3. 하단: 장바구니 및 결제
-        // ---------------------------------------------------------
-        JPanel bottomPanel = UITheme.createSectionPanel(new BorderLayout(), null);
+    private String getImagePath(String menuName) {
+        if (menuName.contains("더블")) return "/image/double.png";
+        if (menuName.contains("치즈")) return "/image/cheese.png";
+        if (menuName.contains("불고기")) return "/image/bulgogi.png";
+        if (menuName.contains("새우")) return "/image/shrimp.png";
+        if (menuName.contains("치킨")) return "/image/chicken.png";
+        if (menuName.contains("데리")) return "/image/terri.png";
+        if (menuName.contains("모짜렐라")) return "/image/mozza.png";
+        if (menuName.contains("감자")) return "/image/fries.png";
+        if (menuName.contains("콜라")) return "/image/cola.png";
+        if (menuName.contains("스프라이트")) return "/image/sprite.png";
+        if (menuName.contains("에그타르트")) return "/image/eggtart.png";
+        if (menuName.contains("윙봉")) return "/image/wingbong.png";
+        if (menuName.contains("소프트콘")) return "/image/soft.png";
+        if (menuName.contains("환타")) return "/image/fanta.png";
+        return null;
+    }
+
+    private void setupBottomPanel() {
+        JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setPreferredSize(new Dimension(800, 200));
 
-        // 장바구니
-        String[] cols = {"메뉴명", "옵션", "수량", "금액"};
-        tableModel = new DefaultTableModel(cols, 0);
+        tableModel = new DefaultTableModel(new String[]{"메뉴명", "옵션", "수량", "금액"}, 0);
         JTable cartTable = new JTable(tableModel);
         UITheme.styleTable(cartTable);
         bottomPanel.add(new JScrollPane(cartTable), BorderLayout.CENTER);
 
-        // 결제 버튼 패널
         JPanel payPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        payPanel.setBackground(UITheme.BASE_BG);
-
         lblTotal = new JLabel("총 결제금액: 0원   ");
         lblTotal.setFont(UITheme.FONT_TITLE);
 
@@ -199,49 +147,25 @@ public class CustomerMainView extends JFrame {
         btnPay.setFont(UITheme.FONT_BOLD);
         btnPay.setBackground(Color.BLACK);
         btnPay.setForeground(Color.WHITE);
-        btnPay.setOpaque(true);
-        btnPay.setBorderPainted(false);
-        btnPay.setPreferredSize(new Dimension(120, 40));
+        btnPay.setPreferredSize(new Dimension(130, 40));
         btnPay.addActionListener(e -> processPayment());
 
         payPanel.add(lblTotal);
         payPanel.add(btnPay);
         bottomPanel.add(payPanel, BorderLayout.SOUTH);
-
         add(bottomPanel, BorderLayout.SOUTH);
-
-        setVisible(true);
     }
-
-    // ---------------------------------------------------------
-    // 동작 로직
-    // ---------------------------------------------------------
 
     private void onMenuClick(MenuDTO menu) {
         if (menu.getSetPrice() == 0) {
             addToCart(menu, false);
             return;
         }
-
-        Object[] options = {
-                "단품 (" + String.format("%,d", menu.getPrice()) + "원)",
-                "세트 (" + String.format("%,d", menu.getSetPrice()) + "원)"
-        };
-
-        int choice = JOptionPane.showOptionDialog(this,
-                menu.getMenuName() + " 주문 옵션을 선택하세요.",
-                "메뉴 선택",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                options,
-                options[0]);
-
-        if (choice == JOptionPane.YES_OPTION) {
-            addToCart(menu, false);
-        } else if (choice == JOptionPane.NO_OPTION) {
-            addToCart(menu, true);
-        }
+        Object[] options = {"단품 (" + menu.getPrice() + ")", "세트 (" + menu.getSetPrice() + ")"};
+        int choice = JOptionPane.showOptionDialog(this, "옵션을 선택하세요.", "주문",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        if (choice == JOptionPane.YES_OPTION) addToCart(menu, false);
+        else if (choice == JOptionPane.NO_OPTION) addToCart(menu, true);
     }
 
     private void addToCart(MenuDTO menu, boolean isSet) {
@@ -253,46 +177,21 @@ public class CustomerMainView extends JFrame {
         tableModel.setRowCount(0);
         int total = 0;
         for (CartItemDTO item : cartList) {
-            String option = item.isSet() ? "세트" : "단품";
-            tableModel.addRow(new Object[]{
-                    item.getMenu().getMenuName(),
-                    option,
-                    item.getQuantity(),
-                    String.format("%,d", item.getSubTotal())
-            });
+            tableModel.addRow(new Object[]{item.getMenu().getMenuName(), item.isSet() ? "세트" : "단품", 1, String.format("%,d", item.getSubTotal())});
             total += item.getSubTotal();
         }
         lblTotal.setText("총 결제금액: " + String.format("%,d", total) + "원   ");
     }
 
     private void processPayment() {
-        if (cartList.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "장바구니가 비어있습니다.");
-            return;
-        }
-
-        int total = 0;
-        for (CartItemDTO item : cartList) total += item.getSubTotal();
-
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "총 " + String.format("%,d", total) + "원을 결제하시겠습니까?",
-                "결제 확인", JOptionPane.YES_NO_OPTION);
-
-        if (confirm == JOptionPane.YES_OPTION) {
+        if (cartList.isEmpty()) return;
+        int total = cartList.stream().mapToInt(CartItemDTO::getSubTotal).sum();
+        if (JOptionPane.showConfirmDialog(this, String.format("%,d", total) + "원을 결제하시겠습니까?", "결제", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             OrderDAO dao = new OrderDAO();
             int orderId = dao.placeOrder(storeId, cartList, total);
-
             if (orderId != -1) {
-                String orderNum = dao.getOrderNumber(orderId);
-                JOptionPane.showMessageDialog(this,
-                        "주문이 완료되었습니다!\n주문번호: [ " + orderNum + " ]\n잠시만 기다려주세요.",
-                        "주문 성공", JOptionPane.INFORMATION_MESSAGE);
-                cartList.clear();
-                refreshCart();
-                myOrderId = orderId;
-                startPolling();
-            } else {
-                JOptionPane.showMessageDialog(this, "주문 처리에 실패했습니다.", "실패", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "주문 완료!");
+                cartList.clear(); refreshCart(); myOrderId = orderId; startPolling();
             }
         }
     }
@@ -300,29 +199,19 @@ public class CustomerMainView extends JFrame {
     private void startPolling() {
         if (notificationTimer != null) notificationTimer.stop();
         notificationTimer = new Timer(3000, e -> {
-            OrderDAO dao = new OrderDAO();
-            String status = dao.checkOrderStatus(myOrderId);
-            if ("COMPLETED".equals(status)) {
+            if ("COMPLETED".equals(new OrderDAO().checkOrderStatus(myOrderId))) {
                 notificationTimer.stop();
-                JOptionPane.showMessageDialog(null, "주문하신 메뉴가 준비되었습니다!", "픽업 알림", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, "주문하신 메뉴가 준비되었습니다!");
             }
         });
         notificationTimer.start();
     }
 
-    // ---------------------------------------------------------
-    // 이미지 로드 헬퍼 메서드
-    // ---------------------------------------------------------
     private ImageIcon loadResizedIcon(String path, int width, int height) {
         try {
             URL imgURL = getClass().getResource(path);
             if (imgURL == null) return null;
-            ImageIcon originalIcon = new ImageIcon(imgURL);
-            Image resizedImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
-            return new ImageIcon(resizedImage);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+            return new ImageIcon(new ImageIcon(imgURL).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
+        } catch (Exception e) { return null; }
     }
 }
