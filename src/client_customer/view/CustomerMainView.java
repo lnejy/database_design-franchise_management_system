@@ -67,7 +67,7 @@ public class CustomerMainView extends JFrame {
                         m.getMenuName().contains("콜라") || m.getMenuName().contains("사이다") ||
                                 m.getMenuName().contains("환타") || m.getMenuName().contains("음료") ||
                                 m.getMenuName().contains("커피") || m.getMenuName().contains("스프라이트") ||
-                                m.getMenuName().contains("아메리카노")
+                                m.getMenuName().contains("아메리카노")|| m.getMenuName().contains("마운틴듀")
                 ).collect(Collectors.toList())
         ));
 
@@ -76,7 +76,8 @@ public class CustomerMainView extends JFrame {
                 allMenus.stream().filter(m ->
                         !m.getMenuName().contains("버거") && !m.getMenuName().contains("콜라") &&
                                 !m.getMenuName().contains("사이다") && !m.getMenuName().contains("환타") &&
-                                !m.getMenuName().contains("스프라이트")
+                                !m.getMenuName().contains("스프라이트") && !m.getMenuName().contains("아메리카노") && 
+                                !m.getMenuName().contains("마운틴듀")
                 ).collect(Collectors.toList())
         ));
 
@@ -114,19 +115,27 @@ public class CustomerMainView extends JFrame {
 
     private String getImagePath(String menuName) {
         if (menuName.contains("더블")) return "/image/double.png";
-        if (menuName.contains("치즈")) return "/image/cheese.png";
+        if (menuName.contains("치즈버거")) return "/image/cheese.png";
         if (menuName.contains("불고기")) return "/image/bulgogi.png";
         if (menuName.contains("새우")) return "/image/shrimp.png";
         if (menuName.contains("치킨")) return "/image/chicken.png";
         if (menuName.contains("데리")) return "/image/terri.png";
         if (menuName.contains("모짜렐라")) return "/image/mozza.png";
         if (menuName.contains("감자")) return "/image/fries.png";
+        if (menuName.contains("제로콜라")) return "/image/zerocoke.png";
         if (menuName.contains("콜라")) return "/image/cola.png";
         if (menuName.contains("스프라이트")) return "/image/sprite.png";
         if (menuName.contains("에그타르트")) return "/image/eggtart.png";
         if (menuName.contains("윙봉")) return "/image/wingbong.png";
         if (menuName.contains("소프트콘")) return "/image/soft.png";
         if (menuName.contains("환타")) return "/image/fanta.png";
+        if (menuName.contains("아메리카노")) return "/image/americano.png";
+        if (menuName.contains("마운틴듀")) return "/image/mountaindew.png";
+        if (menuName.contains("시그니처")) return "/image/signatureBurger.png";
+        if (menuName.contains("치즈스틱")) return "/image/cheesestick.png";
+        if (menuName.contains("코울슬로")) return "/image/coleslaw.png";
+        
+        
         return null;
     }
 
@@ -135,7 +144,7 @@ public class CustomerMainView extends JFrame {
         bottomPanel.setPreferredSize(new Dimension(800, 200));
 
         tableModel = new DefaultTableModel(new String[]{"메뉴명", "옵션", "수량", "금액"}, 0);
-        JTable cartTable = new JTable(tableModel);
+        JTable cartTable = new JTable(tableModel);  
         UITheme.styleTable(cartTable);
         bottomPanel.add(new JScrollPane(cartTable), BorderLayout.CENTER);
 
@@ -151,7 +160,9 @@ public class CustomerMainView extends JFrame {
 
         JButton btnPay = new JButton("결제하기");
         btnPay.setFont(UITheme.FONT_BOLD);
-        btnPay.setBackground(Color.BLACK);
+        btnPay.setOpaque(true);
+        btnPay.setBorderPainted(false);
+        btnPay.setBackground(Color.BLUE);
         btnPay.setForeground(Color.WHITE);
         btnPay.setOpaque(true);
         btnPay.setContentAreaFilled(true);
