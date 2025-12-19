@@ -9,13 +9,11 @@ import java.util.Vector;
 /**
  * 매출 관련 데이터베이스 접근 객체 (DAO)
  * 
- * <p><b>담당 테이블:</b> customer_order, ingredient</p>
+ * 담당 테이블: customer_order, ingredient
  * 
- * <p><b>주요 기능:</b></p>
- * <ul>
- *   <li>매장별 주문 내역 조회</li>
- *   <li>총 매출액 계산</li>
- * </ul>
+ * 주요 기능:
+ * - 매장별 주문 내역 조회
+ * - 총 매출액 계산
  * 
  * @author Franchise Management System
  */
@@ -24,12 +22,10 @@ public class SalesDAO {
     /**
      * 특정 매장의 주문 내역 조회 (JTable 표시용)
      * 
-     * <p><b>DB 흐름:</b></p>
-     * <ol>
-     *   <li>customer_order 테이블에서 해당 매장의 주문 조회</li>
-     *   <li>order_time 컬럼 기준 내림차순 정렬 (최신 주문이 위로)</li>
-     *   <li>주문번호, 결제금액, 상태, 주문일시 반환</li>
-     * </ol>
+     * DB 흐름:
+     * 1. customer_order 테이블에서 해당 매장의 주문 조회
+     * 2. order_time 컬럼 기준 내림차순 정렬 (최신 주문이 위로)
+     * 3. 주문번호, 결제금액, 상태, 주문일시 반환
      * 
      * @param storeId 매장 ID
      * @return 주문 내역 테이블 데이터
@@ -67,11 +63,9 @@ public class SalesDAO {
     /**
      * 특정 매장의 총 누적 매출액 조회
      * 
-     * <p><b>DB 흐름:</b></p>
-     * <ol>
-     *   <li>customer_order 테이블에서 해당 매장의 모든 주문 조회</li>
-     *   <li>total_amount 컬럼의 합계 계산 (SUM)</li>
-     * </ol>
+     * DB 흐름:
+     * 1. customer_order 테이블에서 해당 매장의 모든 주문 조회
+     * 2. total_amount 컬럼의 합계 계산 (SUM)
      * 
      * @param storeId 매장 ID
      * @return 총 누적 매출액 (원)
@@ -96,8 +90,8 @@ public class SalesDAO {
     /**
      * 모든 재료 목록 조회
      * 
-     * <p><b>참고:</b> StoreDAO에도 동일한 메서드가 있습니다.
-     * 중복 제거를 위해 공통 DAO로 이동 고려 필요.</p>
+     * 참고: StoreDAO에도 동일한 메서드가 있습니다.
+     * 중복 제거를 위해 공통 DAO로 이동 고려 필요.
      * 
      * @return 모든 재료 정보 리스트
      */

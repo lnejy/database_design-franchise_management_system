@@ -1,16 +1,13 @@
 package common.dto;
 
 /**
- * 재료 정보를 담는 데이터 전송 객체 (DTO)
- * 
- * <p><b>DB 테이블:</b> ingredient</p>
- * <p><b>주요 사용처:</b></p>
- * <ul>
- *   <li>발주 다이얼로그에서 재료 선택 (OrderIngredientDialog)</li>
- *   <li>재고 관리 화면에서 재료 정보 표시</li>
- *   <li>레시피 정보와 연계하여 재고 차감 계산</li>
- * </ul>
- * 
+ * 재료 정보를 담는 데이터 전송 객체(DTO)입니다.
+ *
+ * DB 테이블 ingredient 의 한 행을 표현하며,
+ * 발주 다이얼로그에서 재료를 선택하거나
+ * 재고 관리 화면에서 재료 정보를 표시할 때 사용됩니다.
+ * 또한 레시피 정보와 연계하여 주문 시 재고 차감 계산에 활용됩니다.
+ *
  * @author Franchise Management System
  */
 public class IngredientDTO {

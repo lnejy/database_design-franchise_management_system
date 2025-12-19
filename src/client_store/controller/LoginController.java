@@ -11,18 +11,14 @@ import javax.swing.*;
 /**
  * 매장 로그인 화면 컨트롤러
  * 
- * <p><b>주요 기능:</b></p>
- * <ul>
- *   <li>매장 로그인 인증 처리</li>
- *   <li>매장 등록 다이얼로그 호출</li>
- *   <li>로그인 성공 시 메인 화면으로 전환</li>
- * </ul>
+ * 주요 기능:
+ * - 매장 로그인 인증 처리
+ * - 매장 등록 다이얼로그 호출
+ * - 로그인 성공 시 메인 화면으로 전환
  * 
- * <p><b>DB 흐름:</b></p>
- * <ol>
- *   <li>사용자 입력 (매장 코드, 전화번호) → StoreDAO.login() 호출</li>
- *   <li>DB에서 매장 정보 조회 → 로그인 성공 시 StoreMainView로 이동</li>
- * </ol>
+ * DB 흐름:
+ * 1. 사용자 입력 (매장 코드, 전화번호) → StoreDAO.login() 호출
+ * 2. DB에서 매장 정보 조회 → 로그인 성공 시 StoreMainView로 이동
  * 
  * @author Franchise Management System
  */
@@ -51,8 +47,8 @@ public class LoginController {
     /**
      * 로그인 처리 메서드
      * 
-     * <p>매장 코드와 전화번호를 입력받아 DB에서 인증하고,
-     * 성공 시 메인 화면으로 전환합니다.</p>
+     * 매장 코드와 전화번호를 입력받아 DB에서 인증하고,
+     * 성공 시 메인 화면으로 전환합니다.
      */
     private void handleLogin() {
         String code = view.getStoreCode();

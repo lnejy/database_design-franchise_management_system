@@ -1,16 +1,14 @@
 package common.dto;
 
 /**
- * 매장 정보를 담는 데이터 전송 객체 (DTO)
- * 
- * <p><b>DB 테이블:</b> store</p>
- * <p><b>주요 사용처:</b></p>
- * <ul>
- *   <li>매장 로그인 인증 (LoginController)</li>
- *   <li>매장 정보 조회 및 등록 (StoreDAO)</li>
- *   <li>키오스크 매장 선택 (CustomerAppMain)</li>
- * </ul>
- * 
+ * 매장 정보를 담는 데이터 전송 객체(DTO)입니다.
+ *
+ * DB 테이블 store 의 한 행을 표현하며,
+ * 다음과 같은 시나리오에서 주로 사용됩니다.
+ * - 매장 로그인 인증(LoginController)
+ * - 매장 정보 조회 및 등록(StoreDAO)
+ * - 키오스크에서 매장 선택(CustomerAppMain)
+ *
  * @author Franchise Management System
  */
 public class StoreDTO {

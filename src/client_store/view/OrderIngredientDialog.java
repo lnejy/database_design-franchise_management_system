@@ -11,14 +11,12 @@ import java.util.List;
 /**
  * 재료 발주 요청 다이얼로그
  * 
- * <p>매장 관리자가 재료를 발주 요청하는 다이얼로그입니다.</p>
+ * 매장 관리자가 재료를 발주 요청하는 다이얼로그입니다.
  * 
- * <p><b>DB 흐름:</b></p>
- * <ol>
- *   <li>재료 선택 및 수량 입력</li>
- *   <li>StoreDAO.requestSupply() 호출 → store_material_request INSERT (status='PENDING')</li>
- *   <li>본사 승인 대기 상태로 등록</li>
- * </ol>
+ * DB 흐름:
+ * 1. 재료 선택 및 수량 입력
+ * 2. StoreDAO.requestSupply() 호출 → store_material_request INSERT (status='PENDING')
+ * 3. 본사 승인 대기 상태로 등록
  * 
  * @author Franchise Management System
  */

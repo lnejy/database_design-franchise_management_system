@@ -6,18 +6,18 @@ import java.sql.SQLException;
 import javax.swing.JOptionPane;
 
 /**
- * 데이터베이스 연결 관리 클래스
- * 
- * <p>프로젝트 전체에서 사용하는 MySQL 데이터베이스 연결을 관리합니다.
- * 싱글톤 패턴을 사용하여 연결 설정을 중앙에서 관리합니다.</p>
- * 
- * <p><b>DB 흐름:</b></p>
- * <ul>
- *   <li>애플리케이션 시작 시 MySQL JDBC 드라이버 자동 로드</li>
- *   <li>각 DAO 클래스에서 getConnection() 호출하여 DB 연결 획득</li>
- *   <li>try-with-resources 구문으로 자동 연결 해제</li>
- * </ul>
- * 
+ * 데이터베이스 연결을 관리하는 유틸리티 클래스입니다.
+ *
+ * 프로젝트 전체에서 사용하는 MySQL 데이터베이스 연결을 한 곳에서 설정하고,
+ * 각 DAO 가 공통으로 사용할 수 있도록 제공합니다.
+ * 애플리케이션 시작 시 JDBC 드라이버를 한 번만 로드하고,
+ * try-with-resources 구문을 통해 연결이 자동으로 해제되도록 사용하는 것을 권장합니다.
+ *
+ * 주요 흐름
+ * - 애플리케이션 시작 시 MySQL JDBC 드라이버가 로드됩니다.
+ * - 각 DAO 클래스에서는 {@link #getConnection()} 을 호출하여 DB 연결을 획득합니다.
+ * - try-with-resources 구문을 사용하여 사용이 끝난 연결은 자동으로 해제됩니다.
+ *
  * @author Franchise Management System
  * @version 1.0
  */
@@ -30,13 +30,14 @@ public class DBConnection {
     private static final String USER = "root";
     
     /** 데이터베이스 비밀번호 */
-    private static final String PASSWORD = "1111";
+    private static final String PASSWORD = "0618";
 
     /**
-     * 정적 초기화 블록: MySQL JDBC 드라이버 로드
-     * 
-     * <p>클래스가 최초 로드될 때 한 번만 실행되며,
-     * 드라이버가 없을 경우 사용자에게 오류 메시지를 표시합니다.</p>
+     * 정적 초기화 블록.
+     *
+     * 클래스가 최초로 로드될 때 한 번만 실행되며,
+     * MySQL JDBC 드라이버를 로드합니다.
+     * 드라이버를 찾을 수 없는 경우 사용자에게 오류 메시지를 표시합니다.
      */
     static {
         try {
@@ -53,28 +54,27 @@ public class DBConnection {
     }
 
     /**
-     * 데이터베이스 연결 객체를 반환합니다.
-     * 
-     * <p><b>사용 예시:</b></p>
-     * <pre>{@code
+     * 데이터베이스 연결 객체를 생성하여 반환합니다.
+     *
+     * 예시
      * try (Connection conn = DBConnection.getConnection();
      *      PreparedStatement pstmt = conn.prepareStatement(sql)) {
      *     // DB 작업 수행
      * }
-     * }</pre>
-     * 
+     *
      * @return 데이터베이스 연결 객체
-     * @throws SQLException 데이터베이스 연결 실패 시 발생
+     * @throws SQLException 데이터베이스 연결에 실패한 경우
      */
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 
     /**
-     * 데이터베이스 연결 테스트용 메인 메서드
-     * 
-     * <p>개발 및 디버깅 목적으로 사용됩니다.</p>
-     * 
+     * 데이터베이스 연결을 테스트하기 위한 메인 메서드입니다.
+     *
+     * 개발 및 디버깅 목적으로 사용되며,
+     * 실제 서비스 코드에서는 사용하지 않습니다.
+     *
      * @param args 명령행 인수 (사용하지 않음)
      */
     public static void main(String[] args) {

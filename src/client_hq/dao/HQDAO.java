@@ -13,14 +13,12 @@ import java.util.Vector;
 /**
  * 본사 관리 관련 데이터베이스 접근 객체 (DAO)
  * 
- * <p><b>담당 테이블:</b> store_material_request, store_inventory</p>
+ * 담당 테이블: store_material_request, store_inventory
  * 
- * <p><b>주요 기능:</b></p>
- * <ul>
- *   <li>발주 요청 목록 조회</li>
- *   <li>발주 승인 처리 (재고 증가 포함)</li>
- *   <li>발주 반려 처리</li>
- * </ul>
+ * 주요 기능:
+ * - 발주 요청 목록 조회
+ * - 발주 승인 처리 (재고 증가 포함)
+ * - 발주 반려 처리
  * 
  * @author Franchise Management System
  */
@@ -29,12 +27,10 @@ public class HQDAO {
     /**
      * 대기 중인 발주 요청 목록 조회
      * 
-     * <p><b>DB 흐름:</b></p>
-     * <ol>
-     *   <li>store_material_request, store, ingredient 테이블을 JOIN</li>
-     *   <li>status가 'PENDING'인 발주만 조회</li>
-     *   <li>요청일시 내림차순 정렬 (최신 요청이 위로)</li>
-     * </ol>
+     * DB 흐름:
+     * 1. store_material_request, store, ingredient 테이블을 JOIN
+     * 2. status가 'PENDING'인 발주만 조회
+     * 3. 요청일시 내림차순 정렬 (최신 요청이 위로)
      * 
      * @return 대기 중인 발주 요청 리스트
      */
@@ -68,14 +64,12 @@ public class HQDAO {
     /**
      * 발주 승인 처리 (트랜잭션)
      * 
-     * <p><b>DB 흐름 (트랜잭션):</b></p>
-     * <ol>
-     *   <li><b>발주 상태 변경:</b> store_material_request의 status를 'APPROVED'로 변경, processed_date 설정</li>
-     *   <li><b>재고 증가:</b> 해당 매장의 store_inventory에서 발주 수량만큼 재고 증가</li>
-     *   <li><b>커밋:</b> 모든 작업 성공 시 커밋, 실패 시 롤백</li>
-     * </ol>
+     * DB 흐름 (트랜잭션):
+     * 1. 발주 상태 변경: store_material_request의 status를 'APPROVED'로 변경, processed_date 설정
+     * 2. 재고 증가: 해당 매장의 store_inventory에서 발주 수량만큼 재고 증가
+     * 3. 커밋: 모든 작업 성공 시 커밋, 실패 시 롤백
      * 
-     * <p><b>주의사항:</b> 재고 테이블에 해당 재료가 없으면 업데이트 실패합니다.</p>
+     * 주의사항: 재고 테이블에 해당 재료가 없으면 업데이트 실패합니다.
      * 
      * @param requestId 발주 요청 ID
      * @return 승인 처리 성공 여부
@@ -129,11 +123,9 @@ public class HQDAO {
     /**
      * 발주 반려 처리
      * 
-     * <p><b>DB 흐름:</b></p>
-     * <ol>
-     *   <li>store_material_request 테이블의 status를 'REJECTED'로 변경</li>
-     *   <li>재고는 변경하지 않음</li>
-     * </ol>
+     * DB 흐름:
+     * 1. store_material_request 테이블의 status를 'REJECTED'로 변경
+     * 2. 재고는 변경하지 않음
      * 
      * @param requestId 발주 요청 ID
      * @return 반려 처리 성공 여부

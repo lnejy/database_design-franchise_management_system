@@ -1,22 +1,20 @@
 package common.dto;
 
 /**
- * 발주 요청 정보를 담는 데이터 전송 객체 (DTO)
- * 
- * <p><b>DB 테이블:</b> store_material_request (JOIN store, ingredient)</p>
- * <p><b>주요 사용처:</b></p>
- * <ul>
- *   <li>본사 발주 관리 화면 (HQMainView)</li>
- *   <li>발주 승인/반려 처리</li>
- * </ul>
- * 
- * <p><b>DB 흐름:</b></p>
- * <ol>
- *   <li><b>발주 요청:</b> 매장에서 발주 신청 → store_material_request INSERT (status='PENDING')</li>
- *   <li><b>발주 승인:</b> 본사에서 승인 → status='APPROVED', store_inventory 재고 증가</li>
- *   <li><b>발주 반려:</b> 본사에서 반려 → status='REJECTED'</li>
- * </ol>
- * 
+ * 발주 요청 정보를 담는 데이터 전송 객체(DTO)입니다.
+ *
+ * 매장이 본사에 자재 발주를 신청할 때 사용되는 데이터 구조로,
+ * DB 테이블 store_material_request (store, ingredient 와 조인) 의 한 행을 표현합니다.
+ *
+ * 주요 사용처
+ * - 본사 발주 관리 화면(HQMainView)에서 발주 목록을 표시할 때 사용됩니다.
+ * - 발주 승인, 반려 등 상태를 변경하는 로직에서 사용됩니다.
+ *
+ * DB 처리 흐름 요약
+ * 1. 발주 요청: 매장에서 신청하면 store_material_request 에 INSERT 되고 status 는 'PENDING' 으로 저장됩니다.
+ * 2. 발주 승인: 본사에서 승인 시 status 를 'APPROVED' 로 변경하고, store_inventory 재고를 증가시킵니다.
+ * 3. 발주 반려: 본사에서 반려 시 status 를 'REJECTED' 로 변경합니다.
+ *
  * @author Franchise Management System
  */
 public class SupplyOrderDTO {
@@ -84,10 +82,11 @@ public class SupplyOrderDTO {
     }
 
     /**
-     * JTable에 표시하기 위한 Object 배열로 변환
-     * 
-     * <p>테이블 모델에 직접 추가할 수 있도록 모든 필드를 배열로 반환합니다.</p>
-     * 
+     * JTable에 표시하기 위한 Object 배열로 변환합니다.
+     *
+     * 테이블 모델에 직접 추가할 수 있도록
+     * 이 DTO 의 주요 필드를 한 행(row)에 해당하는 배열 형태로 반환합니다.
+     *
      * @return 테이블 행 데이터 배열
      */
     public Object[] toRow() {

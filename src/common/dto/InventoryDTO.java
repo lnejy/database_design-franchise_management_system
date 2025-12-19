@@ -1,23 +1,17 @@
 package common.dto;
 
 /**
- * 매장 재고 정보를 담는 데이터 전송 객체 (DTO)
- * 
- * <p><b>DB 테이블:</b> store_inventory (JOIN ingredient)</p>
- * <p><b>주요 사용처:</b></p>
- * <ul>
- *   <li>매장 재고 관리 화면 (StoreMainView)</li>
- *   <li>재고 부족 알림 및 발주 권장</li>
- *   <li>주문 시 재고 차감 확인</li>
- * </ul>
- * 
- * <p><b>DB 흐름:</b></p>
- * <ul>
- *   <li>조회: store_inventory JOIN ingredient → 재고 현황 표시</li>
- *   <li>차감: 주문 시 menu_recipe 기반으로 자동 차감 (OrderDAO)</li>
- *   <li>증가: 본사 발주 승인 시 재고 증가 (HQDAO)</li>
- * </ul>
- * 
+ * 매장 재고 정보를 담는 데이터 전송 객체(DTO)입니다.
+ *
+ * DB 테이블 store_inventory (ingredient 와 조인) 의 한 행을 표현하며,
+ * 매장 재고 관리 화면(StoreMainView)에서 재고 현황을 표시할 때 사용됩니다.
+ * 또한 재고 부족 알림, 발주 권장, 주문 시 재고 차감 확인 등의 기능에 활용됩니다.
+ *
+ * DB 처리 흐름 요약
+ * - 조회: store_inventory 와 ingredient 를 조인하여 현재 재고 현황을 조회합니다.
+ * - 차감: 주문 발생 시 menu_recipe 정보를 기반으로 재고를 자동 차감합니다(OrderDAO).
+ * - 증가: 본사에서 발주를 승인하면 해당 재료의 재고를 증가시킵니다(HQDAO).
+ *
  * @author Franchise Management System
  */
 public class InventoryDTO {
@@ -76,12 +70,12 @@ public class InventoryDTO {
     }
 
     /**
-     * 재고 상태를 판별하여 문자열로 반환
-     * 
-     * <p>현재 재고가 최소 기준보다 낮으면 "부족 (발주필요)"를 반환하고,
-     * 그렇지 않으면 "양호"를 반환합니다.</p>
-     * 
-     * @return 재고 상태 문자열
+     * 재고 상태를 판별하여 문자열로 반환합니다.
+     *
+     * 현재 재고가 최소 기준보다 낮으면 "부족 (발주필요)" 를,
+     * 그렇지 않으면 "양호" 를 반환합니다.
+     *
+     * @return 재고 상태를 나타내는 문자열
      */
     public String getStatus() {
         if (quantity < minThreshold) {

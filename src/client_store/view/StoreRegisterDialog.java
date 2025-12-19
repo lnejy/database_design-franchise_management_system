@@ -7,16 +7,17 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * 매장 신규 등록 다이얼로그
- * 
- * <p>새로운 매장을 등록하는 다이얼로그입니다.</p>
- * 
- * <p><b>DB 흐름:</b></p>
- * <ol>
- *   <li>매장 정보 입력</li>
- *   <li>StoreDAO.registerStore() 호출 → store 테이블에 INSERT</li>
- * </ol>
- * 
+ * 매장 신규 등록을 위한 다이얼로그입니다.
+ *
+ * 점주 프로그램에서 새로운 매장을 등록할 때 사용되며,
+ * 화면에서 입력받은 매장 정보를 기반으로 {@link StoreDAO#registerStore(common.dto.StoreDTO)}
+ * 메서드를 호출하여 store 테이블에 INSERT 합니다.
+ *
+ * 전체 흐름
+ * 1. 사용자가 매장명, 코드, 연락처, 주소, 점장 이름을 입력합니다.
+ * 2. [등록 완료] 버튼 클릭 시 유효성 검사를 수행합니다.
+ * 3. 유효할 경우 StoreDAO 를 통해 DB 에 매장 정보를 저장합니다.
+ *
  * @author Franchise Management System
  */
 public class StoreRegisterDialog extends JDialog {
