@@ -180,7 +180,13 @@ INSERT INTO ingredient (ingredient_name, ingredient_code, category_name, unit) V
 ('아이스크림 믹스', 'ING-019', '사이드', 'ml'),
 ('환타 시럽', 'ING-020', '음료', 'ml'),
 ('제로콜라 시럽', 'ING-021', '음료', 'ml'),
-('스프라이트 시럽', 'ING-022', '음료', 'ml')
+('스프라이트 시럽', 'ING-022', '음료', 'ml'),
+('아메리카노 원두', 'ING-023', '음료', 'g'), -- 30g
+('마운틴듀 시럽', 'ING-024', '음료', 'ml'),
+('시그니처 패티', 'ING-025', '육류', '장'),
+('시그니처 소스', 'ING-026', '소스', 'g'),
+('치즈스틱', 'ING-027', '사이드', '개'),
+('코울슬로', 'ING-028', '사이드', '개')
 ;
 
 -- 3. 메뉴 생성 (세트 가격 포함)
@@ -259,6 +265,10 @@ INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
 INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
 (11, 1, 1), (11, 2, 1), (11, 16, 1), (11, 3, 1);
 
+-- 시그니처버거(19) = 시그니처 패티1 + 치즈1 + 시그니처 소스 10g + 피클 30g + 양파 10g + 양상추 10g
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(19, 25, 1), (19, 3, 1), (19, 26, 10), (19, 11, 30), (19, 12, 10), (19, 13, 10);
+
 -- 에그타르트(12) = 에그타르트 1개
 INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
 (12, 17, 1);
@@ -266,6 +276,14 @@ INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
 -- 윙봉(13) = 윙봉 4개
 INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
 (13, 18, 4);
+
+-- 치즈스틱(20) = 치즈스틱 1개
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(20, 27, 1);
+
+-- 코울슬로(21) = 코울슬로 1개
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(21, 28, 1);
 
 -- 소프트콘(14) = 아이스크림 믹스 90ml
 INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
@@ -279,10 +297,17 @@ INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
 INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
 (16, 21, 200);
 
+-- 아메리카노(17) = 아메리카노 원두 30g
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(17, 23, 30);
+
+-- 마운틴듀(18) = 마운틴듀 시럽 200ml
+INSERT INTO menu_recipe (menu_id, ingredient_id, required_quantity) VALUES
+(18, 24, 200);
 
 
 -- 대상 메뉴_id: 1,2,3,4,5,6,10,11 (버거류)
--- 재료_id: 피클(11), 양상추(12), 양파(13), 케찹(9), 마요(6), 불고기소스(8), 타르타르(10), 치즈(3)
+-- 재료_id: 피클(11), 양상추(12), 양파(13), 케찹(9), 마요(6), 불고기소스(8), 타르타르(10), 치즈(3), 시그니처 패티(25), 시그니처 소스(26)
 
 INSERT INTO menu_option
 (menu_id, ingredient_id, option_name, option_type, delta_quantity, delta_price, sort_order)
@@ -390,10 +415,17 @@ VALUES
 (11, 6,  '마요네즈 추가', 'ADD',     10, 0,   40),
 (11, 12, '양상추 추가',   'ADD',     10, 0,   50),
 (11, 13, '양파 추가',     'ADD',     10, 0,   60),
-(11, 11, '피클 추가',     'ADD',     30, 0,   70);
 
+-- 20) 시그니처버거 (menu_id=20)
+(19, 3,  '치즈 제외',     'REMOVE', -1,  0,   10),
+(19, 11,  '피클 제외',     'REMOVE', -30, 0,   20),
+(19, 12, '양상추 제외',   'REMOVE', -10, 0,   30),
 
-
+(19, 26,  '시그니처 소스 추가','ADD',    10, 0,   40),
+(19, 11, '피클 추가',     'ADD',     30, 0,   50),
+(19, 12, '양상추 추가',   'ADD',     10, 0,   60),
+(19, 13, '양파 추가',     'ADD',     10, 0,   70),
+(19, 3,  '치즈 추가',     'ADD',     1,  500, 80);
 
 -- 5. 매장 초기 재고 세팅
 
@@ -406,6 +438,7 @@ INSERT INTO store_inventory (store_id, ingredient_id, quantity) VALUES
 (1, 14, 150),  -- 치킨 패티 (장)
 (1, 15, 120),  -- 새우 패티 (장)
 (1, 16, 80),   -- 모짜렐라 패티 (장)
+(1, 25, 80), -- 시그니처 패티 (장)
 
 -- 음료 시럽/아이스크림 믹스(ml)
 (1, 4, 20000),  -- 콜라 시럽 (ml)
@@ -413,11 +446,14 @@ INSERT INTO store_inventory (store_id, ingredient_id, quantity) VALUES
 (1, 21, 12000), -- 제로콜라 시럽 (ml)
 (1, 22, 12000), -- 스프라이트 시럽 (ml)
 (1, 19, 8000),  -- 아이스크림 믹스 (ml)
+(1, 23, 9000), -- 아메리카노 원두 (g)
 
 -- 사이드 원재료/완제품(개/g)
 (1, 5, 30000),  -- 감자튀김 (g)
 (1, 17, 80),    -- 에그타르트 (개)
 (1, 18, 200),   -- 윙봉 (개)
+(1, 27, 10000), -- 치즈스틱 (개)
+(1, 28, 80), -- 코울슬로 (개)
 
 -- 소스류(g)
 (1, 6, 5000),  -- 마요네즈 (g)
@@ -425,6 +461,7 @@ INSERT INTO store_inventory (store_id, ingredient_id, quantity) VALUES
 (1, 8, 5000),  -- 불고기 소스 (g)
 (1, 9, 5000),  -- 케찹 소스 (g)
 (1, 10, 4000), -- 타르타르소스 (g)
+(1, 26, 3000), -- 시그니처소스 (g)
 
 -- 채소류(g)
 (1, 11, 3000), -- 피클 (g)
